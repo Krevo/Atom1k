@@ -124,188 +124,181 @@
       var TOKEN_RELOAD_ONORIENTATIONCHANGE = true;
     </script>
     <script type="demo">
-      l = [[1,1,1,1,1,0,0,0,0,0,0],
-           [1,2,2,2,1,0,0,0,0,0,0],
-           [1,2,2,2,1,1,1,1,1,1,0],
-           [1,2,2,1,2,2,2,2,2,1,0],
-           [1,2,1,2,2,2,2,2,2,1,1],
-           [1,2,1,2,2,1,2,1,1,2,1],
-           [1,2,2,2,2,1,2,1,2,2,1],
-           [1,1,1,2,1,2,2,1,2,2,1],
-           [0,1,2,2,2,2,2,2,2,2,1],
-           [0,1,1,1,1,1,1,1,1,1,1],
-           [0,0,0,0,0,0,0,0,0,0,0]];
+      l = [[1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+          [1, 2, 2, 2, 1, 0, 0, 0, 0, 0, 0],
+          [1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 0],
+          [1, 2, 2, 1, 2, 2, 2, 2, 2, 1, 0],
+          [1, 2, 1, 2, 2, 2, 2, 2, 2, 1, 1],
+          [1, 2, 1, 2, 2, 1, 2, 1, 1, 2, 1],
+          [1, 2, 2, 2, 2, 1, 2, 1, 2, 2, 1],
+          [1, 1, 1, 2, 1, 2, 2, 1, 2, 2, 1],
+          [0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+          [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]];
 
-		   D = a.height/11;
-       curX = curY = -1; // no current selection
+      D = a.height / 11;
+      curX = curY = -1; // no current selection
 
-       addEventListener('keydown', function(e) {
-         if (curX==-1) return; // there is no current selection
-         var k = e.keyCode;
-         //dx = dy = 0;
-         //if (k==38) dy = -1;
-         //if (k==40) dy = 1;
-         dy=k==40?1:k==38?-1:0;
-         dx=k==39?1:k==37?-1:0;
-         //if (k==37) dx = -1;
-         //if (k==39) dx = 1;
-         while (isFree(curX+dx, curY+dy)) {
-           elt = atom[curX][curY];
-           delAtom(curX,curY);
-           curX+=dx;  curY+=dy;
-           draw(curX-dx,curY-dy);
-           putAtom(curX,curY,elt);
-           draw(curX,curY);
-         }
-         // check for winning pattern
-         console.log("check for winning pattern");
-         //console.log("has won ? "+findWinningPattern());
-         if (findWinningPattern()) {
-           c.fillStyle="#F00";
-           c.font = "32px Arial";
-           c.fillText("YOU WIN !!",150,150);
-           this.removeEventListener('keydown', arguments.callee);
-         }
-       });
-       
-       function isFree(x, y) {
-         return !getAtom(x,y) && l[y][x]>1;
-       }
-       
-		   a.addEventListener('click', function(e) {
-        var x = Math.floor(e.offsetX / D);
-        var y = Math.floor(e.offsetY / D);
-        if (!getAtom(x,y)) return;
-				prevX = curX;
-				prevY = curY;
-				curX = x;
-				curY = y;
-        if (curX==prevX && curY==prevY) {
-          curX = curY = -1; // unset current selection
-        }
-        draw(prevX,prevY);
-        draw(curX,curY);
-       });
-	  
-	     function draw(x,y) {
-	       if (x<0) return;
-	       // Draw rectangular background 
-  		   f=["#FFF","#544","#CB8"];
-			   c.fillStyle=f[l[y][x]];
- 			   c.fillRect(x*D,y*D,D,D);
-         
-         // drawAtom if present
-         drawAtom(x,y);
-         
-         // draw current selection
-	       if (curX==x & curY==y) {
-  		     c.strokeStyle="#FFF";
-           c.lineWidth="2";
-			     c.beginPath();
-			     c.arc(x*D+D/2,y*D+D/2,D/2.5,0,2*Math.PI);
-			     c.stroke();
-			   }
+      addEventListener('keydown', function (e) {
+          if (curX == -1) return; // there is no current selection
+          var k = e.keyCode;
+          dy = k == 40 ? 1 : k == 38 ? -1 : 0;
+          dx = k == 39 ? 1 : k == 37 ? -1 : 0;
+          while (isFree(curX + dx, curY + dy)) {
+              elt = atom[curX][curY];
+              delAtom(curX, curY);
+              curX += dx;
+              curY += dy;
+              draw(curX - dx, curY - dy);
+              putAtom(curX, curY, elt);
+              draw(curX, curY);
+          }
+          // look for winning pattern
+          if (findWinningPattern()) {
+              c.fillStyle = "#F00";
+              c.font = "32px Arial";
+              c.fillText("YOU WIN !!", 150, 150);
+              this.removeEventListener('keydown', arguments.callee);
+          }
+      });
 
-		   }
+      function isFree(x, y) {
+          return !getAtom(x, y) && l[y][x] > 1;
+      }
 
-		   function drawAtom(x,y) {
-        if (!getAtom(x,y)) return;
-        elt = atom[x][y];
-        //               |----> bas
-			  //               ||---> haut
-			  //               |||--> gauche
-			  //               ||||-> droite
-			  // masque de bit 0001 
-			  c.fillStyle="#DDD";
-			  // lien gauche
-			  if ((elt.link&2)==2) c.fillRect(x*D,y*D+D/2-3,D/2,6);
-			  // lien droit
-			  if ((elt.link&1)==1) c.fillRect(x*D+D/2,y*D+D/2-3,D/2,6);
-			  // lien haut
-			  if ((elt.link&4)==4) c.fillRect(x*D+D/2-3,y*D,6,D/2);
-			  // lien bas
-			  if ((elt.link&8)==8) c.fillRect(x*D+D/2-3,y*D+D/2,6,D/2);
-			  
-			  // colored circle
-			  c.fillStyle=elt.atom.color;
-			  c.beginPath();
-			  c.arc(x*D+D/2,y*D+D/2,D/2.5,0,2*Math.PI);
-			  c.fill();
+      a.addEventListener('click', function (e) {
+          var x = Math.floor(e.offsetX / D);
+          var y = Math.floor(e.offsetY / D);
+          if (!getAtom(x, y)) return;
+          prevX = curX;
+          prevY = curY;
+          curX = x;
+          curY = y;
+          if (curX == prevX && curY == prevY) {
+              curX = curY = -1; // unset current selection
+          }
+          draw(prevX, prevY);
+          draw(curX, curY);
+      });
 
-			  // text ("H", "O", ....)
-			  c.fillStyle="#FFF";
-			  c.font = (D/2)+"px Arial";
-			  c.fillText(elt.atom.name,x*D+D/3,y*D+D/1.5,D*2);
-		   }
+      function draw(x, y) {
+          if (x < 0) return;
+          // Draw rectangular background
+          f = ["#FFF", "#544", "#CB8"];
+          c.fillStyle = f[l[y][x]];
+          c.fillRect(x * D, y * D, D, D);
 
-			H = {color: "#00F", name: "H"};
-			HRight = {atom: H, link: 1};
-			HLeft = {atom: H, link: 2};
-			O = {color: "red", name: "O"};
-			ORigthLeft = {atom: O, link: 3};
+          // drawAtom if present
+          drawAtom(x, y);
+
+          // draw current selection
+          if (curX == x & curY == y) {
+              c.strokeStyle = "#FFF";
+              c.lineWidth = "2";
+              c.beginPath();
+              c.arc(x * D + D / 2, y * D + D / 2, D / 2.5, 0, 2 * Math.PI);
+              c.stroke();
+          }
+
+      }
+
+      function drawAtom(x, y) {
+          if (!getAtom(x, y)) return;
+          elt = atom[x][y];
+          //               |----> bas
+          //               ||---> haut
+          //               |||--> gauche
+          //               ||||-> droite
+          // masque de bit 0001
+          c.fillStyle = "#DDD";
+          // lien gauche
+          if ((elt.link & 2) == 2) c.fillRect(x * D, y * D + D / 2 - 3, D / 2, 6);
+          // lien droit
+          if ((elt.link & 1) == 1) c.fillRect(x * D + D / 2, y * D + D / 2 - 3, D / 2, 6);
+          // lien haut
+          if ((elt.link & 4) == 4) c.fillRect(x * D + D / 2 - 3, y * D, 6, D / 2);
+          // lien bas
+          if ((elt.link & 8) == 8) c.fillRect(x * D + D / 2 - 3, y * D + D / 2, 6, D / 2);
+
+          // colored circle
+          c.fillStyle = elt.atom.color;
+          c.beginPath();
+          c.arc(x * D + D / 2, y * D + D / 2, D / 2.5, 0, 2 * Math.PI);
+          c.fill();
+
+          // text ("H", "O", ....)
+          c.fillStyle = "#FFF";
+          c.font = (D / 2) + "px Arial";
+          c.fillText(elt.atom.name, x * D + D / 3, y * D + D / 1.5, D * 2);
+      }
+
+      H = {color: "#00F", name: "H"};
+      HRight = {atom: H, link: 1};
+      HLeft = {atom: H, link: 2};
+      O = {color: "red", name: "O"};
+      ORigthLeft = {atom: O, link: 3};
 
       atom = [];
-			putAtom(3, 7, HRight);
-			putAtom(3, 2, HLeft);
-			putAtom(8, 6, ORigthLeft);
+      putAtom(3, 7, HRight);
+      putAtom(3, 2, HLeft);
+      putAtom(8, 6, ORigthLeft);
 
       pattern = [HRight, 1, 0, ORigthLeft, 1, 0, HLeft]; // description position gagnant, colonne par colonne, ligne par ligne
 
       function findWinningPattern() {
-		    for (y=0;y<11;y++) {
-			  	for (x=0;x<11;x++) {
-            if (isWinningFromXY(x,y)) return true;
-	  			}
-        }
-        return false;
+          for (y = 0; y < 11; y++) {
+              for (x = 0; x < 11; x++) {
+                  if (isWinningFromXY(x, y)) return true;
+              }
+          }
+          return false;
       }
 
       function isWinningFromXY(x, y) {
-        found = true;
-        index = 0;
-        while (index<pattern.length) {
-          if (getAtom(x,y)) {
-            elt = atom[x][y];
-            if (elt == pattern[index]) {
-              if (index<pattern.length-1) {
-                x += pattern[index+1];
-                y += pattern[index+2];
-                index+=3;
+          found = true;
+          index = 0;
+          while (index < pattern.length) {
+              if (getAtom(x, y)) {
+                  elt = atom[x][y];
+                  if (elt == pattern[index]) {
+                      if (index < pattern.length - 1) {
+                          x += pattern[index + 1];
+                          y += pattern[index + 2];
+                          index += 3;
+                      } else {
+                          found = true;
+                          break;
+                      }
+                  } else {
+                      found = false;
+                      break;
+                  }
               } else {
-                found = true;
-                break;
+                  found = false;
+                  break;
               }
-            } else {
-              found = false;
-              break;
-            }
-          } else {
-            found = false;
-            break;
           }
-        }
-        return found;
+          return found;
       }
 
       function putAtom(x, y, elt) {
-        if (!atom[x]) atom[x] = [];
-        atom[x][y] = elt;
+          if (!atom[x]) atom[x] = [];
+          atom[x][y] = elt;
       }
 
       function delAtom(x, y) {
-        //if (getAtom(x, y))
-        delete atom[x][y];
+          delete atom[x][y];
       }
 
       function getAtom(x, y) {
-        return !!(atom[x] && atom[x][y]);
+          return !!(atom[x] && atom[x][y]);
       }
-      
+
       // draw initial map
-		  for (y=0;y<11;y++) {
-				for (x=0;x<11;x++) {
-          draw(x,y);
-				}
+      for (y = 0; y < 11; y++) {
+          for (x = 0; x < 11; x++) {
+              draw(x, y);
+          }
       }
 
     </script>
