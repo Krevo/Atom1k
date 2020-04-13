@@ -124,7 +124,12 @@
       var TOKEN_RELOAD_ONORIENTATIONCHANGE = true;
     </script>
     <script type="demo">
-      l = [[1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+
+      currentLevel = 1;
+
+      l = [
+        [
+          [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
           [1, 2, 2, 2, 1, 0, 0, 0, 0, 0, 0],
           [1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 0],
           [1, 2, 2, 1, 2, 2, 2, 2, 2, 1, 0],
@@ -134,7 +139,23 @@
           [1, 1, 1, 2, 1, 2, 2, 1, 2, 2, 1],
           [0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1],
           [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]];
+          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        ],
+        [
+          [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          [1, 2, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          [1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+          [1, 2, 1, 2, 1, 2, 1, 2, 2, 2, 2, 2, 2, 1],
+          [1, 2, 1, 2, 1, 2, 1, 2, 2, 2, 1, 2, 2, 1],
+          [1, 2, 2, 1, 2, 2, 1, 1, 1, 1, 1, 2, 2, 1],
+          [1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1],
+          [1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1],
+          [1, 2, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 1],
+          [1, 2, 2, 2, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1],
+          [1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        ]
+      ];
 
       D = a.height / 11;
       curX = curY = -1; // no current selection
@@ -163,7 +184,7 @@
       });
 
       function isFree(x, y) {
-          return !getAtom(x, y) && l[y][x] > 1;
+          return !getAtom(x, y) && l[currentLevel][y][x] > 1;
       }
 
       a.addEventListener('click', function (e) {
@@ -185,9 +206,8 @@
           if (x < 0) return;
           // Draw rectangular background
           f = ["#FFF", "#544", "#CB8"];
-          c.fillStyle = f[l[y][x]];
+          c.fillStyle = f[l[currentLevel][y][x]];
           c.fillRect(x * D, y * D, D, D);
-
           // drawAtom if present
           drawAtom(x, y);
 
@@ -235,15 +255,45 @@
       H = {color: "#00F", name: "H"};
       HRight = {atom: H, link: 1};
       HLeft = {atom: H, link: 2};
+      HUp = {atom: H, link: 4};
+      HDown = {atom: H, link: 8};
       O = {color: "red", name: "O"};
       ORigthLeft = {atom: O, link: 3};
+      C = {color: "gray", name: "C"};
+      CUpDownRigthLeft = {atom: C, link: 15};
 
       atom = [];
-      putAtom(3, 7, HRight);
-      putAtom(3, 2, HLeft);
-      putAtom(8, 6, ORigthLeft);
 
-      pattern = [HRight, 1, 0, ORigthLeft, 1, 0, HLeft]; // description position gagnant, colonne par colonne, ligne par ligne
+      levelInit = [
+        [
+          // Level 1
+          [3, 7, HRight],
+          [3, 2, HLeft],
+          [8, 6, ORigthLeft]
+        ],
+        [
+          // Level 2
+          [5, 4, CUpDownRigthLeft],
+          [9, 4, HDown],
+          [2, 5, HRight],
+          [3, 9, HUp],
+          [8, 8, HLeft]
+        ]
+      ];
+
+      function initLevel(levelNumber) {
+        for (idx = 0; idx < levelInit[levelNumber].length; idx++) {
+          putAtom(levelInit[levelNumber][idx][0], levelInit[levelNumber][idx][1], levelInit[levelNumber][idx][2]);
+        }
+      }
+
+      initLevel(currentLevel);
+
+      patterns = [
+        // elt à trouver, decalage x pour elt suivant, decalagey  pour elt suivant, elet suivant, ...
+        [HRight, 1, 0, ORigthLeft, 1, 0, HLeft],
+        [HDown, -1, 1, HRight, 1, 0, CUpDownRigthLeft, 1, 0, HLeft, -1, 1, HUp],
+      ];
 
       function findWinningPattern() {
           for (y = 0; y < 11; y++) {
@@ -257,13 +307,13 @@
       function isWinningFromXY(x, y) {
           found = true;
           index = 0;
-          while (index < pattern.length) {
+          while (index < patterns[currentLevel].length) {
               if (getAtom(x, y)) {
                   elt = atom[x][y];
-                  if (elt == pattern[index]) {
-                      if (index < pattern.length - 1) {
-                          x += pattern[index + 1];
-                          y += pattern[index + 2];
+                  if (elt == patterns[currentLevel][index]) {
+                      if (index < patterns[currentLevel].length - 1) {
+                          x += patterns[currentLevel][index + 1];
+                          y += patterns[currentLevel][index + 2];
                           index += 3;
                       } else {
                           found = true;
@@ -330,4 +380,3 @@
     </script>
   </body>
 </html>
-
