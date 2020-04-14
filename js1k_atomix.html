@@ -113,7 +113,7 @@
       // true enables webgl shim (exposes `g`), false enables canvas shim (exposes `c`)
       var TOKEN_WEBGL = false;
       // px, 0 means always 100%
-      var TOKEN_MAX_WIDTH = 396;
+      var TOKEN_MAX_WIDTH = 540;
       // px, 0 means always 100%
       var TOKEN_MAX_HEIGHT = 396;
       // should the size be smaller than specified if viewport is smaller?
@@ -125,7 +125,8 @@
     </script>
     <script type="demo">
 
-      currentLevel = 1;
+      var currentLevel = 0;
+      var curX, curY;
 
       l = [
         [
@@ -157,31 +158,42 @@
         ]
       ];
 
-      D = a.height / 11;
-      curX = curY = -1; // no current selection
+      D = Math.min(a.width / 11, a.height / 11);
 
-      addEventListener('keydown', function (e) {
-          if (curX == -1) return; // there is no current selection
-          var k = e.keyCode;
-          dy = k == 40 ? 1 : k == 38 ? -1 : 0;
-          dx = k == 39 ? 1 : k == 37 ? -1 : 0;
-          while (isFree(curX + dx, curY + dy)) {
-              elt = atom[curX][curY];
-              delAtom(curX, curY);
-              curX += dx;
-              curY += dy;
-              draw(curX - dx, curY - dy);
-              putAtom(curX, curY, elt);
-              draw(curX, curY);
-          }
-          // look for winning pattern
-          if (findWinningPattern()) {
-              c.fillStyle = "#F00";
-              c.font = "32px Arial";
-              c.fillText("YOU WIN !!", 150, 150);
-              this.removeEventListener('keydown', arguments.callee);
-          }
-      });
+      function handleKeyDown(e) {
+        if (curX == -1) return; // there is no current selection
+        var k = e.keyCode;
+        dy = k == 40 ? 1 : k == 38 ? -1 : 0;
+        dx = k == 39 ? 1 : k == 37 ? -1 : 0;
+        while (isFree(curX + dx, curY + dy)) {
+            elt = atom[curX][curY];
+            delAtom(curX, curY);
+            curX += dx;
+            curY += dy;
+            draw(curX - dx, curY - dy);
+            putAtom(curX, curY, elt);
+            draw(curX, curY);
+        }
+        // look for winning pattern
+        if (findWinningPattern()) {
+            this.removeEventListener('keydown', handleKeyDown);
+            c.fillStyle = "#F00";
+            c.font = "32px Arial";
+            c.fillText("LEVEL COMPLETED !!", 150, 150);
+            if (currentLevel < l.length) {
+              currentLevel++;
+              setTimeout(startNewLevel, 1000);
+            }
+        }
+      }
+
+      function startNewLevel() {
+        curX = curY = -1; // no current selection
+        initLevel(currentLevel);
+        c.clearRect(0, 0, a.width, a.height);
+        drawInitialMap();
+        addEventListener('keydown', handleKeyDown);
+      }
 
       function isFree(x, y) {
           return !getAtom(x, y) && l[currentLevel][y][x] > 1;
@@ -262,7 +274,7 @@
       C = {color: "gray", name: "C"};
       CUpDownRigthLeft = {atom: C, link: 15};
 
-      atom = [];
+      var atom;
 
       levelInit = [
         [
@@ -282,12 +294,11 @@
       ];
 
       function initLevel(levelNumber) {
+        atom = [];
         for (idx = 0; idx < levelInit[levelNumber].length; idx++) {
           putAtom(levelInit[levelNumber][idx][0], levelInit[levelNumber][idx][1], levelInit[levelNumber][idx][2]);
         }
       }
-
-      initLevel(currentLevel);
 
       patterns = [
         // elt à trouver, decalage x pour elt suivant, decalagey  pour elt suivant, elet suivant, ...
@@ -295,9 +306,11 @@
         [HDown, -1, 1, HRight, 1, 0, CUpDownRigthLeft, 1, 0, HLeft, -1, 1, HUp],
       ];
 
+      startNewLevel();
+
       function findWinningPattern() {
-          for (y = 0; y < 11; y++) {
-              for (x = 0; x < 11; x++) {
+          for (y = 0; y < l[currentLevel].length; y++) {
+            for (x = 0; x < l[currentLevel][0].length; x++) {
                   if (isWinningFromXY(x, y)) return true;
               }
           }
@@ -345,10 +358,12 @@
       }
 
       // draw initial map
-      for (y = 0; y < 11; y++) {
-          for (x = 0; x < 11; x++) {
-              draw(x, y);
-          }
+      function drawInitialMap() {
+        for (y = 0; y < l[currentLevel].length; y++) {
+            for (x = 0; x < l[currentLevel][0].length; x++) {
+                draw(x, y);
+            }
+        }
       }
 
     </script>
