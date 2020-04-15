@@ -115,7 +115,7 @@
       // px, 0 means always 100%
       var TOKEN_MAX_WIDTH = 540;
       // px, 0 means always 100%
-      var TOKEN_MAX_HEIGHT = 396;
+      var TOKEN_MAX_HEIGHT = 468;
       // should the size be smaller than specified if viewport is smaller?
       var TOKEN_MAX_100P = false;
       // only if width<100%
@@ -155,10 +155,25 @@
           [1, 2, 2, 2, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1],
           [1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        ],
+        [
+          [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          [1, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          [1, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          [1, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          [1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+          [1, 2, 2, 2, 1, 2, 2, 2, 1, 2, 1, 1, 1],
+          [1, 2, 1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1],
+          [1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1],
+          [1, 2, 2, 1, 1, 1, 2, 2, 1, 2, 1, 2, 1],
+          [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+          [1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 1, 2, 1],
+          [1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1, 2, 1],
+          [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1]
         ]
       ];
 
-      D = Math.min(a.width / 11, a.height / 11);
+      D = 35;
 
       function handleKeyDown(e) {
         if (curX == -1) return; // there is no current selection
@@ -290,6 +305,15 @@
           [2, 5, HRight],
           [3, 9, HUp],
           [8, 8, HLeft]
+        ],
+        [
+          // Level 3
+          [2, 3, HDown],
+          [2, 8, HRight],
+          [5, 10, HUp],
+          [8, 10, HLeft],
+          [6, 8, ORigthLeft],
+          [9, 7, CUpDownRigthLeft]
         ]
       ];
 
@@ -304,6 +328,7 @@
         // elt à trouver, decalage x pour elt suivant, decalagey  pour elt suivant, elet suivant, ...
         [HRight, 1, 0, ORigthLeft, 1, 0, HLeft],
         [HDown, -1, 1, HRight, 1, 0, CUpDownRigthLeft, 1, 0, HLeft, -1, 1, HUp],
+        [HDown, -1, 1, HRight, 1, 0, CUpDownRigthLeft, 0, 1, HUp, 1, -1, ORigthLeft, 1, 0, HLeft]
       ];
 
       startNewLevel();
