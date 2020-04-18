@@ -142,6 +142,14 @@
           c.fillStyle = "black";
           c.font = "28px Arial";
           c.fillText("LEVEL "+(currentLevel+1), 0, 50);
+          var w = 120;
+          var h = 120;
+          var dx = (infoWIDTH - w) / 2;
+          var dy = CANVAS_HEIGHT - h - dx;
+          c.font = "18px Arial";
+          c.fillText(patterns[currentLevel][0], dx, dy - 5);
+          c.fillStyle = "#ccc";
+          c.fillRect(dx, dy, w, h);
       }
 
       function startNewLevel() {
@@ -272,9 +280,9 @@
 
       patterns = [
         // elt à trouver, decalage x pour elt suivant, decalagey  pour elt suivant, elet suivant, ...
-        [HRight, 1, 0, ORigthLeft, 1, 0, HLeft],
-        [HDown, -1, 1, HRight, 1, 0, CUpDownRigthLeft, 1, 0, HLeft, -1, 1, HUp],
-        [HDown, -1, 1, HRight, 1, 0, CUpDownRigthLeft, 0, 1, HUp, 1, -1, ORigthLeft, 1, 0, HLeft]
+        ["Water", HRight, 1, 0, ORigthLeft, 1, 0, HLeft],
+        ["Methane", HDown, -1, 1, HRight, 1, 0, CUpDownRigthLeft, 1, 0, HLeft, -1, 1, HUp],
+        ["Methanol", HDown, -1, 1, HRight, 1, 0, CUpDownRigthLeft, 0, 1, HUp, 1, -1, ORigthLeft, 1, 0, HLeft]
       ];
 
       startNewLevel();
@@ -290,7 +298,7 @@
 
       function isWinningFromXY(x, y) {
           found = true;
-          index = 0;
+          index = 1;
           while (index < patterns[currentLevel].length) {
               if (getAtom(x, y)) {
                   elt = atom[x][y];
