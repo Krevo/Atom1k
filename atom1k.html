@@ -140,8 +140,29 @@
           var dy = CANVAS_HEIGHT - h - dx;
           c.font = "18px Arial";
           c.fillText(patterns[currentLevel][0], dx, dy - 5);
+
+          // Rectangle with molecule to draw
+          c.translate(dx, dy);
           c.fillStyle = "#ccc";
-          c.fillRect(dx, dy, w, h);
+          c.fillRect(0, 0, w, h);
+          c.strokeStyle = "black";
+          c.strokeRect(0, 0, w, h);
+
+
+          var wh = giveMoleculeWidthHeigth(currentLevel);
+          var d = D*0.8;
+          var posX = (4.2 - wh.width) / 2;
+          var posY = (4.2 - wh.height) / 2;
+          var idx = 1;
+
+          while (idx < patterns[currentLevel].length) {
+            posX += patterns[currentLevel][idx];
+            posY += patterns[currentLevel][idx+1];
+            drawElt(patterns[currentLevel][idx+2], posX, posY, d);
+            idx += 3;
+          }
+
+          c.setTransform(1, 0, 0, 1, 0, 0);
       }
 
       function startNewLevel() {
@@ -196,14 +217,18 @@
       }
 
       function drawAtom(x, y) {
-          if (!getAtom(x, y)) return;
-          elt = atom[x][y];
+        if (!getAtom(x, y)) return;
+        elt = atom[x][y];
+        drawElt(elt, x, y, D);
+      }
+
+      function drawElt(elt, x, y, D) {
           //               |----> bas
           //               ||---> haut
           //               |||--> gauche
           //               ||||-> droite
           // masque de bit 0001
-          c.fillStyle = "#DDD";
+          c.fillStyle = "#fff"; //c.fillStyle = "#ddd";
           // lien gauche
           if ((elt.link & 2) == 2) c.fillRect(x * D, y * D + D / 2 - 3, D / 2, 6);
           // lien droit
@@ -218,7 +243,6 @@
           c.beginPath();
           c.arc(x * D + D / 2, y * D + D / 2, D / 2.5, 0, 2 * Math.PI);
           c.fill();
-
           // text ("H", "O", ....)
           c.fillStyle = "#FFF";
           c.font = (D / 2) + "px Arial";
@@ -272,10 +296,28 @@
 
       patterns = [
         // elt à trouver, decalage x pour elt suivant, decalagey  pour elt suivant, elet suivant, ...
-        ["Water", HRight, 1, 0, ORigthLeft, 1, 0, HLeft],
-        ["Methane", HDown, -1, 1, HRight, 1, 0, CUpDownRigthLeft, 1, 0, HLeft, -1, 1, HUp],
-        ["Methanol", HDown, -1, 1, HRight, 1, 0, CUpDownRigthLeft, 0, 1, HUp, 1, -1, ORigthLeft, 1, 0, HLeft]
+        ["Water", 0, 0, HRight, 1, 0, ORigthLeft, 1, 0, HLeft],
+        ["Methane", 1, 0, HDown, -1, 1, HRight, 1, 0, CUpDownRigthLeft, 1, 0, HLeft, -1, 1, HUp],
+        ["Methanol", 1, 0, HDown, -1, 1, HRight, 1, 0, CUpDownRigthLeft, 0, 1, HUp, 1, -1, ORigthLeft, 1, 0, HLeft]
       ];
+
+      // calcul la largeur et la hauteur en nb d'atomes d'une molécule
+      function giveMoleculeWidthHeigth(levelIndex) {
+        var target = patterns[levelIndex];
+        var width = 1;
+        var height = 1;
+        var index = 1;
+        var cw = 1;
+        var ch = 1;
+        while (index < target.length) {
+          cw += target[index];
+          ch += target[index + 1];
+          width = Math.max(width, cw);
+          height = Math.max(height, ch);
+          index += 3;
+        }
+        return {width: width, height: height};
+      }
 
       startNewLevel();
 
@@ -290,7 +332,7 @@
 
       function isWinningFromXY(x, y) {
           found = true;
-          index = 1;
+          index = 3;
           while (index < patterns[currentLevel].length) {
               if (getAtom(x, y)) {
                   elt = atom[x][y];
